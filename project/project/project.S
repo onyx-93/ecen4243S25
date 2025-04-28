@@ -3,20 +3,24 @@
 
 rvtest_entry_point:
 
-    # set up PMP so all of memory is accessible and we don't trap when entering supervisor mode
-    li t0, 0xffffffff
-    csrw pmpaddr0, t0
-    li t0, 0x1f
-    csrw pmpcfg1, t0
-    
+    # set up PMP so all of memory is accessible and we don't trap when entering supervisor mode   
     # Define region 0 to cover all addresses as RWX
-    nop
-    csrr* 
+
+
+    nop 
     # switch to supervisor mode	
     # Set mstatus.MPP to 01, set MPEC to a trampoline address where supervisor should begin, do mret
     
-				# fill in instructions here			
-    mret                    	# enter supervisor mode at supervisorstart
+	# fill in instructions here:	
+    li t0, 0xf
+    csrw pmpcfg0, t0
+    li t0, 0xffffffff
+    csrw pmpaddr0, t0
+    li t2, 0x800                  # t2 = 0000_0000_1000_0000_0000, MPP [12:11] = 01
+    csrs mstatus, t2
+    la t2, supervisorstart
+    csrw mepc, t2               #save machine mode address
+    mret                     	# enter supervisor mode at supervisorstart
     nop
 
 supervisorstart:
@@ -31,7 +35,7 @@ supervisorstart:
     sw t1, 0(t0)
 
 
-    la t0, testcode         # address of a routine to run
+    la t0, testcode         # address of  a routine to run
     lui t1, 0x10000         
     add t0, t0, t1          # address of testcode on virtual page 0x90000 
     jr t0                   # jump to the testcode on Virtual page 0x90000, 
