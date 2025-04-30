@@ -23,9 +23,19 @@ rvtest_entry_point:
     mret                     	# enter supervisor mode at supervisorstart
     nop
 
-supervisorstart:
-    la t0, pagetable        	# get address of root page table
-				# fill in instructions here 
+supervisorstart:                            # fill in instructions here 
+    la t0, pagetable        	# get address of root page table | Page table value = 0x08001_0000
+    li t3, 0x800            # Address is now byte aligned (Check which way to shift)
+	li t4, 0x900   		
+    add t3, t3, t0      # t3 = 0x08001_0800   L1 Entries
+    add t4, t4, t0      # t4 = 0x08001_0900   L1 Entries
+    
+     
+    
+
+
+
+
     csrw satp, t0         	# enable virtual memory
     
     # now we are execuiting on virtual page 0x80000, which is also physical page 0x80000
@@ -54,6 +64,7 @@ write_tohost:
 self_loop:
     j self_loop
 
+.align 4
 tohost:
     .word 0
 
@@ -63,7 +74,12 @@ tohost:
 .align 16
 # root (L1) Page table situated at 0x80010000
 pagetable:
+.space 2048
+.4byte 0x20004401
+.space 252
+.4byte 0x20004401
 
 .align 12
 # L0 page table situated at 0x80011000
+.4byte 0x200000CF
 
