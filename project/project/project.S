@@ -25,18 +25,27 @@ rvtest_entry_point:
 
 supervisorstart:                            # fill in instructions here 
     la t0, pagetable        	# get address of root page table | Page table value = 0x08001_0000
-    li t3, 0x800            # Address is now byte aligned (Check which way to shift)
-	li t4, 0x900   		
-    add t3, t3, t0      # t3 = 0x08001_0800   L1 Entries
-    add t4, t4, t0      # t4 = 0x08001_0900   L1 Entries
+    # li t3, 0x800            # Address is now byte aligned (Check which way to shift)
+	# li t4, 0x900   		
+    # add t3, t3, t0      # t3 = 0x08001_0800   L1 Entries
+    # add t4, t4, t0      # t4 = 0x08001_0900   L1 Entries
     
-     
+    li t1, 0x8004000F
+    sw t1, 0x800(t0)
+    li t1, 0x9004000F
+    sw t1, 0x900(t0)
+    la t0, pagetable
+    srli t0, t0, 12
+    li t1, 0x80000000
+    or t0, t0, t1
+         
     
 
 
 
 
     csrw satp, t0         	# enable virtual memory
+    
     
     # now we are execuiting on virtual page 0x80000, which is also physical page 0x80000
     # (this can be whatever you want as long as you use the correct address defined in the proj)	
